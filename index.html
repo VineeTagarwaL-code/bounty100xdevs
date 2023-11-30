@@ -1,0 +1,284 @@
+<head>
+    <title>Video.js Markers Plugin Example</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <style>
+        p {
+            background-color: #eee;
+            border: thin solid #777;
+            padding: 10px;
+        }
+
+        ul#marker-list {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            width: 300px;
+            margin-top: 10px;
+        }
+
+        ul#marker-list li {
+           cursor: pointer;
+        
+              position: relative;
+            margin-bottom: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+
+        ul#marker-list li:last-child {
+            margin-bottom: 0;
+            border-bottom-right-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        ul#marker-list li a {
+            display: block;
+            padding: 10px 15px;
+            color: #555;
+            text-decoration: none;
+        }
+
+        ul#marker-list li:hover {
+            color: #555;
+            text-decoration: none;
+            color:white;
+            background-color: rgb(0, 149, 255);
+        }
+    </style>
+    <link href="https://vjs.zencdn.net/7.6.0/video-js.css" rel="stylesheet">
+    <link href="https://unpkg.com/videojs-markers-plugin@1.0.2/dist/videojs.markers.plugin.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+
+
+    <video id="test_video" controls preload="none" class="video-js vjs-default-skin" width="640" height="264">
+        <source src="http://vjs.zencdn.net/v/oceans.mp4" type="video/mp4">
+        <source src="http://vjs.zencdn.net/v/oceans.webm" type="video/webm">
+    </video>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Add timestamp
+    </button>
+    <ul id='marker-list'>
+
+    </ul>
+
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="">
+                        <div class="d-flex flex-column mb-3"">
+                        <label for=" startTimeInput" class="form-label">Start Time</label>
+
+
+                            <label for="hoursInput">Hours:</label>
+                            <input type="number" id="hoursInputS" name="hours" min="0" max="23">
+
+                            <label for="minutesInput">Minutes:</label>
+                            <input type="number" id="minutesInputS" name="minutes" min="0" max="59">
+
+                            <label for="secondsInput">Seconds:</label>
+                            <input type="number" id="secondsInputS" name="seconds" min="0" max="59">
+
+                        </div>
+
+
+
+
+
+                        <div class="mb-3 d-flex flex-column">
+                            <label for="descriptionInput" class="form-label">Description</label>
+                            <input type="text" id="descriptionInput" name="description">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+    integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+    crossorigin="anonymous"></script>
+
+
+
+<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+<script src="https://vjs.zencdn.net/7.6.0/video.js"></script>
+<script src='https://unpkg.com/videojs-markers-plugin@1.0.2/dist/videojs-markers-plugin.min.js'
+    crossorigin="anonymous"></script>
+
+<script>
+
+    var player = videojs('test_video');
+
+
+
+
+    // Get the input values
+    var Starthours = document.getElementById('hoursInputS').value;
+    var Startminutes = document.getElementById('minutesInputS').value;
+    var Startseconds = document.getElementById('secondsInputS').value;
+
+    // Combine the values to get the complete time representation
+    var time = Starthours + ":" + Startminutes + ":" + Startseconds;
+    console.log("Time selected:", time);
+
+
+
+
+
+    var timestamps = JSON.parse(localStorage.getItem('timestamps')) || [{
+        time: 0,
+        text: "hey"
+    }];
+    function formatTime(seconds) {
+        var hours = Math.floor(seconds / 3600);
+        var minutes = Math.floor((seconds % 3600) / 60);
+        var remainingSeconds = seconds % 60;
+
+        var formattedTime = ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2) + ':' + ('0' + remainingSeconds).slice(-2);
+        return formattedTime;
+    }
+
+    // Retrieve timestamps from localStorage
+
+
+    // Display timestamps in a div as a list
+    var timestampsListDiv = document.getElementById('marker-list');
+    var listHTML = '<h3>Timestamps List</h3>';
+
+    timestamps.forEach(function (timestamp, index) {
+        var formattedTime = formatTime(timestamp.time);
+        listHTML += '<li><strong>Start:</strong> ' + formattedTime + ' <strong>Description:</strong> ' + timestamp.text + '</li>';
+    });
+
+ 
+    timestampsListDiv.innerHTML = listHTML;
+
+
+    // Function to add timestamp to the array
+    function addTimestamp() {
+        var startTime = time;
+      
+        var description = document.getElementById('descriptionInput').value;
+
+
+        function convertTimeToSeconds(time) {
+            var parts = time.split(':');
+            var hours = parseInt(parts[0], 10) || 0;
+            var minutes = parseInt(parts[1], 10) || 0;
+            var seconds = parseInt(parts[2], 10) || 0;
+
+            return hours * 3600 + minutes * 60 + seconds;
+        }
+
+
+
+        var seconds = convertTimeToSeconds(startTime);
+        console.log('Time in seconds:', seconds);
+
+
+
+
+        if (startTime && description) {
+            var timestampData = {
+                time: seconds,
+                text: description
+            }
+            timestamps.push(timestampData);
+
+            localStorage.setItem('timestamps', JSON.stringify(timestamps));
+            console.log("timestamps", timestamps)
+            clearModalFields();
+
+// Reload the webpage
+setTimeout(function() {
+            location.reload();
+        }, 3000);
+
+
+
+        } else {
+            console.error('Please fill in all fields.');
+        }
+    }
+
+
+    function clearModalFields() {
+    document.getElementById('hoursInputS').value = '';
+    document.getElementById('minutesInputS').value = '';
+    document.getElementById('secondsInputS').value = '';
+   
+    document.getElementById('descriptionInput').value = '';
+
+    document.querySelector('#exampleModal button.btn-primary').innerText = 'Added , reloading';
+}
+
+
+
+    player.markers({
+        markerTip: {
+            display: true,
+            text: function (marker) {
+                return marker.text;
+            }
+        },
+        breakOverlay: {
+            display: true,
+            displayTime: 3,
+            text: function (marker) {
+                return "Part: " + marker.text;
+            }
+        },
+        onMarkerReached: function (marker) {
+            console.log(marker);
+        },
+        markers: timestamps
+    });
+
+
+
+    function handleLiClick() {
+        $("#marker-list li").click(function(){
+            var index = $(this).index();
+            console.log(index)
+            player.currentTime(timestamps[index-1].time);
+            // Perform actions or display information based on the clicked marker index
+        });
+    }
+
+    $(document).ready(function(){
+        // ... (existing code remains unchanged)
+
+        // Call the function to handle the click event on li elements
+        handleLiClick();
+    });
+
+
+
+
+
+
+
+    document.querySelector('#exampleModal button.btn-primary').addEventListener('click', addTimestamp);
+</script>
